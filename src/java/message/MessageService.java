@@ -67,10 +67,8 @@ public class MessageService {
     @Produces("application/json")
     public JsonObject post(JsonObject json) {
         try {            
-            int id = messages.add(json.getString("title"), json.getString("contents"), json.getString("author"),
+            messages.add(json.getString("title"), json.getString("contents"), json.getString("author"),
                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(json.getString("sentTime")));
-
-           json = messages.getById(id).toJSON();
         } catch (ParseException ex) {
             Logger.getLogger(MessageService.class.getName()).log(Level.SEVERE, null, ex);
         }
