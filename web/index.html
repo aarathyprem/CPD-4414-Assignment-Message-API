@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Message API</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                    $('#chatwindow').html('');
+                    $('#input').val('');
+                    $.ajax({
+                        url: 'v1/messages',
+                        method: 'get',
+                        contentType: 'application/json',
+                        success: function(data) {
+                            $.each(data, function(index, element) {
+                                $("#chatwindow").append("<p>" + element.senttime 
+                                        + " " + element.author + " : " + "[" 
+                                        + element.title + "] " + element.contents + "</p>");
+                            });
+                        },
+                        dataType: "json"
+                    });
+                $('#send').click(function() {
+                    $.ajax({
+                        url: 'v1/messages',
+                        method: 'post',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            author: $('#name').val(),
+                            title: $('#title').val(),
+                            contents: $('#input').val(),
+                            sentTime: new Date()
+                        }),
+                        success: function(data) {
+                            $("#input").val('');
+                            $("#chatwindow").append("<p>" + data.senttime + " " + data.author + " : " + "[" + data.title + "] " + data.contents + "</p>");
+                        },
+                        dataType: "json"
+                    });
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <p>Name: <input id="name" /></p>
+        <p>Title: <input id="title" /></p>
+        <div id="chatwindow"></div>
+        <p>
+            <input id="input" placeholder="message" />
+            <button id="send">Send</button>
+        </p>
+    </body>
+</html>
