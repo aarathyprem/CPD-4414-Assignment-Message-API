@@ -11,41 +11,45 @@ and open the template in the editor.
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="http://code.jquery.com/jquery.min.js"></script>
         <script>
-            $(document).ready(function() {
-                    $('#chatwindow').html('');
+            var wsUri = "ws://localhost:8080/MessageAPI/chat";
+            $(document).ready(function () {
+                var websocket = new WebSocket(wsUri);
+
+                websocket.onmessage = function (evt) {
+                    if (typeof evt.data !== 'undefined') {
+                        var json = $.parseJSON(evt.data);
+                        for (var i = 0; i < json.length; i++)
+                            $("#chatwindow").append("<p>" + json[i].senttime + " " + json[i].author + " : " + "["
+                                    + json[i].title + "] " + json[i].contents + "</p>");
+                    }
+                };
+
+                function sendMessage() {
+                    var data = {
+                        author: $('#name').val(),
+                        title: $('#title').val(),
+                        contents: $('#input').val(),
+                        sentTime: new Date().toISOString()
+                    };
+                    var json = JSON.stringify(data);
+                    if (websocket.readyState !== 1) {
+                        $('#chatwindow').html('');
+                        websocket = new WebSocket(wsUri);
+                    }
+                    websocket.send(json);
                     $('#input').val('');
-                    $.ajax({
-                        url: 'v1/messages',
-                        method: 'get',
-                        contentType: 'application/json',
-                        success: function(data) {
-                            $.each(data, function(index, element) {
-                                $("#chatwindow").append("<p>" + element.senttime 
-                                        + " " + element.author + " : " + "[" 
-                                        + element.title + "] " + element.contents + "</p>");
-                            });
-                        },
-                        dataType: "json"
-                    });
-                $('#send').click(function() {
-                    $.ajax({
-                        url: 'v1/messages',
-                        method: 'post',
-                        contentType: 'application/json',
-                        data: JSON.stringify({
-                            author: $('#name').val(),
-                            title: $('#title').val(),
-                            contents: $('#input').val(),
-                            sentTime: new Date()
-                        }),
-                        success: function(data) {
-                            $("#input").val('');
-                            $("#chatwindow").append("<p>" + data.senttime + " " + data.author + " : " + "[" + data.title + "] " + data.contents + "</p>");
-                        },
-                        dataType: "json"
-                    });
+                }
+
+                $("#send").click(sendMessage);
+
+                // The following just captures the Enter key to send the message
+                $('#input').keypress(function (e) {
+                    if (e.which == 13) {
+                        sendMessage();
+                    }
                 });
             });
+
         </script>
     </head>
     <body>
